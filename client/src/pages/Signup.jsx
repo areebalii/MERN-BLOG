@@ -1,15 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineMail, HiOutlineLockClosed, HiOutlineUser } from "react-icons/hi";
 import { RouteSignIn } from "@/helper/RouteName";
 import Google from "@/components/Google";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { showToast } from "@/helper/showToast";
 
 const SignUp = () => {
+  const navigate = useNavigate();
   // 1. Define Validation Schema
   const formSchema = z.object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
+    name: z.string().min(3, "Name must be at least 3 characters"),
     email: z.string().email("Please enter a valid email address"),
     password: z.string().min(8, "Password must be at least 8 characters long"),
   });
@@ -31,13 +33,32 @@ const SignUp = () => {
 
   // 3. Handle Submit
   const onSubmit = async (values) => {
-    console.log("Sign Up Data:", values);
-    // Simulate API call
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
 
+      const data = await response.json();
 
+      if (!response.ok) {
+        // If the backend sent an error, show it and stop here
+        showToast("error", data.message || "Failed to create account");
+        return;
+      }
 
+      // Success logic
+      showToast("success", "Account created successfully!");
+      reset();
+      navigate(RouteSignIn);
 
-    reset();
+    } catch (error) {
+      console.error("Error during sign up:", error);
+      showToast("error", "Server is not responding. Please try again later.");
+    }
   };
 
   return (
