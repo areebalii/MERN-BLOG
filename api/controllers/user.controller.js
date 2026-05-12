@@ -1,7 +1,9 @@
 import { handleError } from "../helpers/handleError.js";
 import User from "../models/user.model.js";
+import Post from "../models/post.model.js"
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import cloudinary from "../config/cloudinary.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -39,7 +41,7 @@ export const register = async (req, res, next) => {
   }
 }
 
-export const login = async (req, res, next) => { 
+export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -77,7 +79,7 @@ export const login = async (req, res, next) => {
       path: "/",
     })
 
-    user.toObject({ getters: true }); 
+    user.toObject({ getters: true });
     delete user.password; // Remove password from the user object before sending it in the response
 
     res.status(200).json({
@@ -91,7 +93,7 @@ export const login = async (req, res, next) => {
   }
 }
 
-export const GoogleLogin = async (req, res, next) => { 
+export const GoogleLogin = async (req, res, next) => {
   try {
     const { name, email, avatar } = req.body;
 
@@ -125,7 +127,7 @@ export const GoogleLogin = async (req, res, next) => {
       path: "/",
     })
 
-    user.toObject({ getters: true }); 
+    user.toObject({ getters: true });
     delete user.password; // Remove password from the user object before sending it in the response
 
     res.status(200).json({
@@ -138,3 +140,76 @@ export const GoogleLogin = async (req, res, next) => {
     next(handleError(500, error.message || "Server error during login"));
   }
 }
+
+export const logout = (req, res, next) => {
+  try {
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      path: "/",
+    });
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully"
+    });
+  } catch (error) {
+    next(handleError(500, error.message || "Server error during logout"));
+  }
+};
+
+
+// New controller function to get user stats for the profile page
+export const getUserStats = async (req, res, next) => {
+  try {
+    // 1. Get the user ID from the request (from the URL or the JWT)
+    const userId = req.params.id;
+
+    // 2. Count posts where 'author' matches this user's ID
+    const postCount = await Post.countDocuments({ author: userId });
+
+    // 3. Get the latest 5 posts for the "My Posts" tab
+    const recentPosts = await Post.find({ author: userId })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    res.status(200).json({
+      success: true,
+      postCount,
+      recentPosts
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// function to update user profile (name, avatar, etc.)
+
+
+export const updateUser = async (req, res, next) => {
+  try {
+    const { name, bio } = req.body;
+    let avatarUrl = req.body.avatar; // Keep old avatar if no new file
+
+    if (req.file) {
+      // Log this to see if the file is actually reaching the server
+      console.log("File received:", req.file);
+
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "avatars",
+      });
+      avatarUrl = result.secure_url;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: { name, bio, avatar: avatarUrl } },
+      { new: true }
+    ).select("-password");
+
+    res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.error("Cloudinary/DB Error:", error); // This shows the error in your terminal
+    next(error);
+  }
+};

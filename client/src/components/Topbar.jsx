@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Searchbar from './Searchbar';
-import { RouteSignIn } from '@/helper/RouteName';
+import { RouteIndex, RouteProfile, RouteSignIn } from '@/helper/RouteName';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../redux/user/user.slice'; 
-import { HiOutlineLogout, HiOutlineUser, HiOutlineChevronDown } from 
+import { logout } from '../redux/user/user.slice';
+import { HiOutlineLogout, HiOutlineUser, HiOutlineChevronDown, HiOutlinePlus } from
   'react-icons/hi';
 import { toast } from 'react-toastify';
 
@@ -13,6 +13,7 @@ const Topbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -24,6 +25,26 @@ const Topbar = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/logout`, {
+        method: "get",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to log out");
+      }
+
+      dispatch(logout());
+      navigate(RouteIndex);
+      toast.success("Logged out successfully!");
+    } catch {
+      toast.error("Failed to log out. Please try again.");
+    }
+  };
 
   return (
     <header className="h-16 border-b bg-white flex items-center justify-between px-8 sticky top-0 z-50">
@@ -50,14 +71,14 @@ const Topbar = () => {
               onClick={() => setShowDropdown(!showDropdown)}
               className="flex items-center gap-2 p-1 hover:bg-gray-50 rounded-lg transition-all border border-transparent hover:border-gray-100"
             >
-                <img
-                  referrerPolicy="no-referrer"
-                  src={userData?.avatar || `https://ui-avatars.com/api/?name=${userData?.name}`}
-                  alt="Avatar"
-                  className="w-9 h-9 rounded-full object-cover border-2 border-purple-100"
-                />
+              <img
+                referrerPolicy="no-referrer"
+                src={userData?.avatar || `https://ui-avatars.com/api/?name=${userData?.name}`}
+                alt="Avatar"
+                className="w-9 h-9 rounded-full object-cover border-2 border-purple-100"
+              />
               <div className="hidden md:block text-left">
-                <p className="text-sm font-semibold text-gray-800 leading-none">{ userData?.name}</p>
+                <p className="text-sm font-semibold text-gray-800 leading-none">{userData?.name}</p>
                 <p className="text-[10px] text-gray-500 mt-1">Author</p>
               </div>
               <HiOutlineChevronDown className={`text-gray-400 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
@@ -72,7 +93,14 @@ const Topbar = () => {
                 </div>
 
                 <Link
-                  to="/profile"
+                  to=""
+                  className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
+                  onClick={() => setShowDropdown(false)}
+                >
+                  <HiOutlinePlus className="text-lg" /> Create Blog
+                </Link>
+                <Link
+                  to={RouteProfile}
                   className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
                   onClick={() => setShowDropdown(false)}
                 >
@@ -80,14 +108,10 @@ const Topbar = () => {
                 </Link>
 
                 <button
-                  onClick={() => {
-                    dispatch(logout());
-                      setShowDropdown(false);
-                      toast.success("Logged out successfully!");
-                  }}
+                  onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                 >
-                  <HiOutlineLogout className="text-lg" /> Sign Out
+                  <HiOutlineLogout className="text-lg" /> Log Out
                 </button>
               </div>
             )}

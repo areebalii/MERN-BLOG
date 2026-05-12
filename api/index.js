@@ -16,7 +16,7 @@ app.use(express.json())
 
 
 // Routes
-app.use("/api/auth", userRouter);
+app.use("/api/user", userRouter);
 
 
 mongoose.connect(process.env.MONGODB_CONN, { dbName: "mern-blog" })

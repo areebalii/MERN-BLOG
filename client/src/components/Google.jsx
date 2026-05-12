@@ -38,7 +38,7 @@ const Google = () => {
 
       
       dispatch(setUser(data.user));
-      showToast("success", "Account created successfully!");
+      showToast("success", "Login successfully!");
       navigate(RouteIndex);
 
     } catch (error) {
