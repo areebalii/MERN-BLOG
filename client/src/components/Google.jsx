@@ -19,7 +19,7 @@ const Google = () => {
         email: user.email,
         avatar: user.photoURL
       }
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/google-login`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user/google-login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

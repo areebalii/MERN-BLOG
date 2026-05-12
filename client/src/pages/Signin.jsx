@@ -36,7 +36,7 @@ const SignIn = () => {
   const onSubmit = async (values) => {
     console.log("Form Data:", values);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

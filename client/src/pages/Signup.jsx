@@ -34,7 +34,7 @@ const SignUp = () => {
   // 3. Handle Submit
   const onSubmit = async (values) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -28,7 +28,7 @@ const Topbar = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/logout`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user/logout`, {
         method: "get",
         credentials: "include",
       });

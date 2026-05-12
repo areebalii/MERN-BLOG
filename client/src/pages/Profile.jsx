@@ -6,7 +6,7 @@ import { setUser } from '../redux/user/user.slice'; // <-- IMPORTANT: Add this i
 
 const Profile = () => {
   const dispatch = useDispatch();
-  // Matching your Topbar selector: state.root.user contains { isLoggedIn, user }
+
   const { user: userData } = useSelector((state) => state.root.user);
 
   const [activeTab, setActiveTab] = useState('posts');
