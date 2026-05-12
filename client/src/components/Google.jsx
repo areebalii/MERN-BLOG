@@ -1,11 +1,14 @@
 import { auth, provider } from '@/helper/firebase'
 import { RouteIndex } from '@/helper/RouteName'
 import { showToast } from '@/helper/showToast'
+import { setUser } from '@/redux/user/user.slice'
 import { signInWithPopup } from 'firebase/auth'
 import { FcGoogle } from 'react-icons/fc'
+import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 const Google = () => {
+  const dispatch = useDispatch()
   const navigate = useNavigate()
   const handleLogin = async () => {
     try {
@@ -33,7 +36,8 @@ const Google = () => {
         return;
       }
 
-      // Success logic
+      
+      dispatch(setUser(data.user));
       showToast("success", "Account created successfully!");
       navigate(RouteIndex);
 

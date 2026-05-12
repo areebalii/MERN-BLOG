@@ -90,6 +90,7 @@ export const login = async (req, res, next) => {
     next(handleError(500, error.message || "Server error during login"));
   }
 }
+
 export const GoogleLogin = async (req, res, next) => { 
   try {
     const { name, email, avatar } = req.body;

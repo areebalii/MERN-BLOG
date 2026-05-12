@@ -6,8 +6,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Google from "@/components/Google";
 import { showToast } from "@/helper/showToast";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/redux/user/user.slice";
 
 const SignIn = () => {
+  const dispatch = useDispatch()
   const Navigate = useNavigate();
   // 1. Define Validation Schema
   const formSchema = z.object({
@@ -50,7 +53,7 @@ const SignIn = () => {
         return;
       }
 
-      // Success logic
+      dispatch(setUser(data.user));
       showToast("success", "Account created successfully!");
       reset();
       Navigate(RouteIndex);
