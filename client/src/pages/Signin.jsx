@@ -1,12 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineMail, HiOutlineLockClosed } from "react-icons/hi";
-import { RouteSignUp } from "@/helper/RouteName";
+import { RouteIndex, RouteSignUp } from "@/helper/RouteName";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Google from "@/components/Google";
+import { showToast } from "@/helper/showToast";
 
 const SignIn = () => {
+  const Navigate = useNavigate();
   // 1. Define Validation Schema
   const formSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
@@ -28,8 +30,35 @@ const SignIn = () => {
   });
 
   // 3. Handle Submit
-  const onSubmit = (values) => {
+  const onSubmit = async (values) => {
     console.log("Form Data:", values);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Important for sending cookies
+        body: JSON.stringify(values),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // If the backend sent an error, show it and stop here
+        showToast("error", data.message || "Failed to create account");
+        return;
+      }
+
+      // Success logic
+      showToast("success", "Account created successfully!");
+      reset();
+      Navigate(RouteIndex);
+
+    } catch (error) {
+      console.error("Error during sign up:", error);
+      showToast("error", "Server is not responding. Please try again later.");
+    }
 
 
 
