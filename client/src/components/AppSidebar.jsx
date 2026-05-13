@@ -5,6 +5,7 @@ import { FiRss } from "react-icons/fi";       // For Blogs
 import { FaRegComments } from "react-icons/fa"; // For Comments
 import { HiOutlineUsers } from "react-icons/hi2"; // For Users
 import { GoCircle } from "react-icons/go";      // For Category item
+import { RouteCategoryDetails } from '@/helper/RouteName';
 
 const AppSidebar = () => {
   const menuItems = [
@@ -34,12 +35,12 @@ const AppSidebar = () => {
 
       {/* Categories Sub-Section */}
       <div className="mt-4">
-        <h3 className="px-3 text-gray-400 text-sm font-semibold mb-3 tracking-wide uppercase">
+        <Link to={RouteCategoryDetails} lassName="px-3 text-gray-400 text-sm font-semibold mb-3 tracking-wide uppercase">
           Categories
-        </h3>
+        </Link>
 
         <Link
-          to="/category/item"
+          to=""
           className="flex items-center gap-4 px-3 py-2 text-gray-500 hover:text-black transition-colors"
         >
           <GoCircle className="text-[10px] ml-1" />
