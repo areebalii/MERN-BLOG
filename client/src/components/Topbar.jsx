@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Searchbar from './Searchbar';
-import { RouteIndex, RouteProfile, RouteSignIn } from '@/helper/RouteName';
+import { RouteCreatePost, RouteIndex, RouteProfile, RouteSignIn } from '@/helper/RouteName';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../redux/user/user.slice';
 import { HiOutlineLogout, HiOutlineUser, HiOutlineChevronDown, HiOutlinePlus } from
@@ -93,7 +93,7 @@ const Topbar = () => {
                 </div>
 
                 <Link
-                  to=""
+                  to={RouteCreatePost}
                   className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
                   onClick={() => setShowDropdown(false)}
                 >

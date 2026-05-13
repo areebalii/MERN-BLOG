@@ -11,3 +11,5 @@ if (category_id) {
     return '/categories/edit/:category_id';
 }
 }
+
+export const RouteCreatePost = '/create-post'

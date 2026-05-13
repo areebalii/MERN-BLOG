@@ -41,57 +41,80 @@ export const register = async (req, res, next) => {
   }
 }
 
+// export const login = async (req, res, next) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     // Validate input
+//     if (!email || !password) {
+//       return next(handleError(400, "Email and password are required"));
+//     }
+
+//     // Check if user exists
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       return next(handleError(401, "Invalid email or password"));
+//     }
+
+//     // Check if password is correct
+//     const isMatch = await bcryptjs.compare(password, user.password);
+//     if (!isMatch) {
+//       return next(handleError(401, "Invalid email or password"));
+//     }
+
+//     // Generate JWT token
+//     const token = jwt.sign(
+//       {
+//         id: user._id,
+//         name: user.name,
+//         email: user.email,
+//         avatar: user.avatar
+//       },
+//       process.env.JWT_SECRET
+//     );
+//     res.cookie("access_token", token, {
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === "production",
+//       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+//       path: "/",
+//     })
+
+//     user.toObject({ getters: true });
+//     delete user.password; // Remove password from the user object before sending it in the response
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Login successful",
+//       user,
+//       token
+//     });
+//   } catch (error) {
+//     next(handleError(500, error.message || "Server error during login"));
+//   }
+// }
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-
-    // Validate input
-    if (!email || !password) {
-      return next(handleError(400, "Email and password are required"));
-    }
-
-    // Check if user exists
     const user = await User.findOne({ email });
-    if (!user) {
-      return next(handleError(401, "Invalid email or password"));
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Check if password is correct
     const isMatch = await bcryptjs.compare(password, user.password);
-    if (!isMatch) {
-      return next(handleError(401, "Invalid email or password"));
-    }
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-    // Generate JWT token
     const token = jwt.sign(
-      {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar
-      },
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET
     );
-    res.cookie("access_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      path: "/",
-    })
 
-    user.toObject({ getters: true });
-    delete user.password; // Remove password from the user object before sending it in the response
+    const { password: pass, ...rest } = user._doc;
 
-    res.status(200).json({
-      success: true,
-      message: "Login successful",
-      user,
-      token
-    });
+    res.status(200)
+      .cookie("access_token", token, { httpOnly: true })
+      .json(rest);
   } catch (error) {
-    next(handleError(500, error.message || "Server error during login"));
+    next(error);
   }
-}
+};
 
 export const GoogleLogin = async (req, res, next) => {
   try {
@@ -114,6 +137,7 @@ export const GoogleLogin = async (req, res, next) => {
     const token = jwt.sign(
       {
         id: user._id,
+        role: user.role,
         name: user.name,
         email: user.email,
         avatar: user.avatar
