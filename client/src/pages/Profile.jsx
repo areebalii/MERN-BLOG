@@ -255,9 +255,55 @@ const Profile = () => {
                 )}
               </div>
             ) : (
-              <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm leading-relaxed text-gray-600">
-                {userData?.bio || "No bio available. Add one to let people know more about you!"}
-              </div>
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                  <div className="p-8 sm:p-10">
+                    {/* Decorative Quote Icon */}
+                    <div className="mb-6">
+                      <span className="text-6-xl text-purple-200 font-serif leading-none">“</span>
+                    </div>
+
+                    <div className="relative">
+                      {userData?.bio ? (
+                        <div className="space-y-6">
+                          <p className="text-lg text-gray-700 leading-relaxed italic font-medium">
+                            {userData.bio}
+                          </p>
+
+                          {/* Subtle Divider */}
+                          <div className="h-1 w-12 bg-purple-600 rounded-full"></div>
+
+                          <div className="flex flex-wrap gap-6 pt-2">
+                            <div className="flex items-center gap-2 text-gray-500 text-sm">
+                              <span className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-purple-600">
+                                <HiOutlineUser />
+                              </span>
+                              <span>Verified Author</span>
+                            </div>
+                            {/* You can add more dynamic info here later, like Location or Website */}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-10">
+                          <div className="text-5xl mb-4">✍️</div>
+                          <p className="text-gray-400 italic">
+                            Your story hasn't been told yet.
+                          </p>
+                          <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="mt-4 text-purple-600 font-semibold hover:underline"
+                          >
+                            Add a bio to your profile
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Closing Quote Icon */}
+                    <div className="flex justify-end mt-2">
+                      <span className="text-6xl text-purple-200 font-serif leading-none rotate-180">“</span>
+                    </div>
+                  </div>
+                </div>
             )}
           </div>
         </div>
