@@ -35,7 +35,7 @@ const AppSidebar = () => {
 
       {/* Categories Sub-Section */}
       <div className="mt-4">
-        <Link to={RouteCategoryDetails} lassName="px-3 text-gray-400 text-sm font-semibold mb-3 tracking-wide uppercase">
+        <Link to={RouteCategoryDetails} className="px-3 text-gray-400 text-sm font-semibold mb-3 tracking-wide uppercase">
           Categories
         </Link>
 

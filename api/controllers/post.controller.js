@@ -38,3 +38,66 @@ export const createPost = async (req, res, next) => {
     next(handleError(500, error.message));
   }
 };
+
+export const getPostBySlug = async (req, res, next) => {
+  try {
+    const post = await Post.findOne({ slug: req.params.slug }).populate('author', 'name avatar');
+    if (!post) {
+      return next(handleError(404, 'Post not found'));
+    }
+    res.status(200).json({ success: true, post });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPosts = async (req, res, next) => {
+  try {
+    // Sort by createdAt -1 to show newest blogs first
+    const posts = await Post.find()
+      .populate('author', 'name avatar')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, posts });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getRelatedPosts = async (req, res, next) => {
+  try {
+    const { category, currentPostId } = req.query;
+    const relatedPosts = await Post.find({
+      category: category,
+      _id: { $ne: currentPostId } // Exclude the post the user is currently reading
+    })
+      .limit(3) // Limit to 3 posts
+      .select('title featuredImage slug createdAt');
+
+    res.status(200).json({ success: true, relatedPosts });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const likePost = async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    if (!post) return next(handleError(404, 'Post not found'));
+
+    const userIndex = post.likes.indexOf(req.user.id);
+
+    if (userIndex === -1) {
+      // User hasn't liked it yet
+      post.likes.push(req.user.id);
+    } else {
+      // User already liked it, so remove the like (Toggle)
+      post.likes.splice(userIndex, 1);
+    }
+
+    await post.save();
+    res.status(200).json(post);
+  } catch (error) {
+    next(error);
+  }
+};

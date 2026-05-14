@@ -3,6 +3,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AdminPrivateRoute from './components/AdminProtectedRoute';
 import Layout from './components/Layout';
+import PostDetail from './pages/PostDetail';
 
 function App() {
   // Check if admin exists in localStorage
@@ -23,7 +24,7 @@ function App() {
         <Route element={<AdminPrivateRoute />}>
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            {/* You can add more admin routes here later */}
+            <Route path="/post/:slug" element={<PostDetail />} />
           </Route>
         </Route>
 

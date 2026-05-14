@@ -1,9 +1,12 @@
 import  { useState } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const CreatePost = () => {
+  const { user: userData } = useSelector((state) => state.root.user); 
   const [file, setFile] = useState(null);
   const [formData, setFormData] = useState({ title: '', content: '', category: '' });
   const [loading, setLoading] = useState(false);
@@ -22,12 +25,15 @@ const CreatePost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!userData?._id) return toast.error("Please login first");
+
     setLoading(true);
 
     const data = new FormData();
     data.append('title', formData.title);
     data.append('content', formData.content);
     data.append('category', formData.category);
+    data.append('author', userData._id); // ADD THIS LINE
     if (file) data.append('file', file);
 
     try {
