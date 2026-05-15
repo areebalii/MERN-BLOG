@@ -54,11 +54,11 @@ const PostDetail = () => {
       const res = await fetch(`http://localhost:3000/api/post/likePost/${post._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        // If you use cookies/JWT, ensure you handle credentials if needed
+        credentials: 'include',
       });
       if (res.ok) {
         const data = await res.json();
-        setPost({ ...post, likes: data.likes });
+        setPost((prev) => ({ ...prev, likes: data.likes })); // 👈 functional update
       }
     } catch (err) {
       console.error("Like error:", err);

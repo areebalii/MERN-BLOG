@@ -85,17 +85,18 @@ export const likePost = async (req, res, next) => {
     const post = await Post.findById(req.params.postId);
     if (!post) return next(handleError(404, 'Post not found'));
 
-    const userIndex = post.likes.indexOf(req.user.id);
+    const currentUserId = req.user.id;
+
+    const userIndex = post.likes.indexOf(currentUserId);
 
     if (userIndex === -1) {
-      // User hasn't liked it yet
-      post.likes.push(req.user.id);
+      post.likes.push(currentUserId);
     } else {
-      // User already liked it, so remove the like (Toggle)
       post.likes.splice(userIndex, 1);
     }
 
     await post.save();
+    // Return the whole post or just the likes array
     res.status(200).json(post);
   } catch (error) {
     next(error);

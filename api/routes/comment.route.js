@@ -5,7 +5,7 @@ import { verifyToken } from '../middleware/verifyToken.middleware.js';
 
 const commentRouter = express.Router();
 
-commentRouter.post('/create', verifyToken, createComment);
+commentRouter.post('/create', verifyToken, createComment); 
 commentRouter.get('/getPostComments/:postId', getPostComments);
 commentRouter.put('/likeComment/:commentId', verifyToken, likeComment);
 commentRouter.put('/editComment/:commentId', verifyToken, editComment);
