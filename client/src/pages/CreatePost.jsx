@@ -1,4 +1,4 @@
-import  { useState } from 'react';
+import { useState } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { useSelector } from 'react-redux';
@@ -6,26 +6,42 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const CreatePost = () => {
-  const { user: userData } = useSelector((state) => state.root.user); 
+  const { user: userData } = useSelector((state) => state.root.user);
   const [file, setFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({ title: '', content: '', category: '' });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Toolbar options for the editor
+  // Premium, production-ready toolbar modules
   const modules = {
     toolbar: [
-      [{ 'header': [1, 2, false] }],
+      [{ 'header': [1, 2, 3, false] }],
       ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered' }, { 'list': 'bullet' }], // Bullet points
-      ['link', 'code-block'],
-      ['clean']
+      [{ 'color': [] }, { 'background': [] }],          // Text & Highlight colors
+      [{ 'script': 'sub' }, { 'script': 'super' }],      // Sub/Superscript
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      [{ 'alignment': [] }],                             // Text Alignment
+      ['blockquote', 'code-block'],
+      ['link'],
+      ['clean']                                          // Clear formatting
     ],
+  };
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setImagePreview(URL.createObjectURL(selectedFile)); // Create live preview link
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!userData?._id) return toast.error("Please login first");
+    if (!formData.content || formData.content === '<p><br></p>') {
+      return toast.error("Please write some content before publishing");
+    }
 
     setLoading(true);
 
@@ -33,82 +49,146 @@ const CreatePost = () => {
     data.append('title', formData.title);
     data.append('content', formData.content);
     data.append('category', formData.category);
-    data.append('author', userData._id); // ADD THIS LINE
+    data.append('author', userData._id);
     if (file) data.append('file', file);
 
     try {
       const res = await fetch('http://localhost:3000/api/post/create', {
         method: 'POST',
-        body: data, // Sending as FormData for the image
+        body: data,
       });
       const result = await res.json();
       if (result.success) {
+        toast.success("Story published successfully!");
         navigate(`/post/${result.post.slug}`);
+      } else {
+        toast.error(result.message || "Failed to publish");
       }
     } catch (error) {
       console.error("Error creating post:", error);
+      toast.error("Something went wrong while publishing");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-sm rounded-3xl my-10">
-      <h1 className="text-3xl font-bold mb-8 text-slate-800">Create a New Post</h1>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 my-12">
+      <div className="bg-white border border-slate-100 shadow-xl shadow-slate-100/50 rounded-3xl p-6 sm:p-10">
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title */}
-        <input
-          type="text"
-          placeholder="Title of your blog"
-          className="w-full text-4xl font-bold border-none outline-none placeholder:text-slate-300"
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          required
-        />
-
-        {/* Cover Image Upload */}
-        <div className="border-2 border-dashed border-slate-200 p-8 rounded-2xl text-center">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFile(e.target.files[0])}
-            className="hidden"
-            id="cover-img"
-          />
-          <label htmlFor="cover-img" className="cursor-pointer text-purple-600 font-semibold">
-            {file ? `Selected: ${file.name}` : "Click to upload a cover image"}
-          </label>
+        <div className="mb-10">
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Create New Story</h1>
+          <p className="text-sm text-slate-400 mt-1">Share your thoughts, tech findings, or codebase architectures.</p>
         </div>
 
-        {/* Category Selection */}
-        <select
-          className="w-full p-3 rounded-xl border border-slate-200"
-          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-        >
-          <option value="">Select Category</option>
-          <option value="technology">Technology</option>
-          <option value="lifestyle">Lifestyle</option>
-        </select>
+        <form onSubmit={handleSubmit} className="space-y-8">
 
-        {/* The Proper Editor */}
-        <div className="h-72 mb-12">
-          <ReactQuill
-            theme="snow"
-            value={formData.content}
-            onChange={(value) => setFormData({ ...formData, content: value })}
-            modules={modules}
-            className="h-full rounded-xl"
-            placeholder="Write your story here..."
-          />
-        </div>
+          {/* Elegant Auto-Resizing Title Field */}
+          <div>
+            <textarea
+              rows="1"
+              placeholder="Title of your blog..."
+              className="w-full text-3xl sm:text-4xl font-black border-none outline-none resize-none placeholder:text-slate-200 text-slate-900 focus:ring-0 leading-tight"
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onInput={(e) => {
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+              }}
+              required
+            />
+          </div>
 
-        <button
-          disabled={loading}
-          className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-slate-800 transition-all"
-        >
-          {loading ? "Publishing..." : "Publish Post"}
-        </button>
-      </form>
+          {/* Upgraded Drag & Drop Style Cover Image Area */}
+          <div className="group relative border-2 border-dashed border-slate-200 hover:border-violet-400 p-2 rounded-2xl text-center bg-slate-50/50 transition-all">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              id="cover-img"
+            />
+            <label htmlFor="cover-img" className="cursor-pointer block p-6">
+              {imagePreview ? (
+                <div className="relative rounded-xl overflow-hidden max-h-64 shadow-inner">
+                  <img src={imagePreview} className="w-full h-full object-cover" alt="Cover preview" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <p className="text-white text-xs font-bold uppercase tracking-widest bg-black/40 px-4 py-2 rounded-lg backdrop-blur-sm">Change Cover Image</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-4 flex flex-col items-center justify-center gap-2">
+                  <span className="text-sm text-violet-600 font-bold uppercase tracking-wider bg-violet-50 px-4 py-1.5 rounded-full border border-violet-100">Upload Banner</span>
+                  <p className="text-xs text-slate-400 mt-1">Supports high-res PNG, JPG, or WEBP layouts</p>
+                </div>
+              )}
+            </label>
+          </div>
+
+          {/* Minimalist Selection Menu */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Select Category</label>
+            <select
+              className="w-full p-3.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700 outline-none focus:border-violet-500 transition-all appearance-none cursor-pointer shadow-sm"
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              required
+            >
+              <option value="">Choose a topic...</option>
+              <option value="technology">Technology</option>
+              <option value="lifestyle">Lifestyle</option>
+            </select>
+          </div>
+
+          {/* Modernized Fluid Quill Area */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Story Body</label>
+            <div className="quill-wrapper border border-slate-200 rounded-2xl overflow-hidden focus-within:border-violet-500 transition-all shadow-sm">
+              <ReactQuill
+                theme="snow"
+                value={formData.content}
+                onChange={(value) => setFormData({ ...formData, content: value })}
+                modules={modules}
+                placeholder="Once upon a time in a terminal window..."
+              />
+            </div>
+          </div>
+
+          {/* Premium UI Styles injected right into Quill dynamically */}
+          <style>{`
+            .quill-wrapper .ql-toolbar.ql-snow {
+              border: none !important;
+              background-color: #f8fafc !important;
+              border-bottom: 1px solid #e2e8f0 !important;
+              padding: 12px !important;
+            }
+            .quill-wrapper .ql-container.ql-snow {
+              border: none !important;
+              font-family: inherit !important;
+              font-size: 1rem !important;
+            }
+            .quill-wrapper .ql-editor {
+              min-height: 320px !important; /* Elegant fluid default padding */
+              max-height: 600px;
+              overflow-y: auto;
+              color: #334155 !important;
+              line-height: 1.75 !important;
+              padding: 24px !important;
+            }
+            .quill-wrapper .ql-editor.ql-blank::before {
+              color: #cbd5e1 !important;
+              font-style: normal !important;
+              left: 24px !important;
+            }
+          `}</style>
+
+          {/* Actions */}
+          <button
+            disabled={loading}
+            className="w-full bg-slate-950 text-white py-4 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none shadow-md shadow-slate-900/10"
+          >
+            {loading ? "Publishing Story..." : "Publish Post"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
