@@ -31,15 +31,15 @@ const Login = () => {
         return;
       }
 
-      // 1. Check if the logged-in user is an admin
-      if (data.role !== 'admin') {
+      // 1. Check if the nested user object exists and is an admin 
+      if (!data.user || data.user.role !== 'admin') {
         setError("Access denied. You are not an admin.");
         setLoading(false);
         return;
       }
 
-      // 2. Save admin data to localStorage
-      localStorage.setItem('adminUser', JSON.stringify(data));
+      // 2. Save the real user data object to localStorage 👈 FIXED HERE
+      localStorage.setItem('adminUser', JSON.stringify(data.user));
 
       // 3. Redirect to dashboard
       navigate('/dashboard');

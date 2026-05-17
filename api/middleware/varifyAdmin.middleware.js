@@ -7,10 +7,16 @@ export const verifyAdmin = (req, res, next) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ message: "Invalid Token" });
 
-    // Check if the role in the token is 'admin'
-    if (decoded.role !== 'admin') {
-      return res.status(403).json({ message: "Forbidden: You are not an admin" });
+  
+    console.log("DECODED ADMIN TOKEN:", decoded);
+
+    // Check if the role matches
+    if (!decoded.role || decoded.role !== 'admin') {
+      return res.status(403).json({
+        message: `Forbidden: You are not an admin. Your current token role is: ${decoded.role}`
+      });
     }
+    console.log("Admin verified successfully with role:", decoded.role);
 
     req.user = decoded;
     next();

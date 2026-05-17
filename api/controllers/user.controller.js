@@ -95,22 +95,39 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+
+    // 1. Find user by email
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
+    // 2. Check password match
     const isMatch = await bcryptjs.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
 
+    // 3. Generate JWT Token with explicit role
     const token = jwt.sign(
       { id: user._id, role: user.role },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' } // Highly recommended to set an expiration
     );
 
+    // 4. Exclude password out of the response document safely
     const { password: pass, ...rest } = user._doc;
 
+    // 5. Send cookie with client credentials safety policies
+    // Inside your login controller function on the backend
     res.status(200)
-      .cookie("access_token", token, { httpOnly: true })
-      .json(rest);
+      .cookie("access_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",  // ← only HTTPS in prod
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        path: "/",
+      })
+      .json({
+        success: true,
+        message: "Login successful",
+        user: rest
+      });
   } catch (error) {
     next(error);
   }
@@ -120,50 +137,50 @@ export const GoogleLogin = async (req, res, next) => {
   try {
     const { name, email, avatar } = req.body;
 
-    // Check if user exists
+    // 1. Check if user exists
     let user = await User.findOne({ email });
+
     if (!user) {
-      // If user doesn't exist, create a new user
-      const password = Math.random().toString(36).slice(-8); // Generate a random password for the new user
-      const hashedPassword = await bcryptjs.hash(password, 10); // Hash the random password
+      // If user doesn't exist, create a new user (defaults to "user" role)
+      const password = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcryptjs.hash(password, 10);
       const newUser = new User({
         name, email, password: hashedPassword, avatar
       });
       user = await newUser.save();
     }
 
-
-    // Generate JWT token
+    // 2. Generate JWT token with the current DB role value
     const token = jwt.sign(
       {
         id: user._id,
-        role: user.role,
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar
+        role: user.role 
       },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
     );
-    res.cookie("access_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      path: "/",
-    })
 
-    user.toObject({ getters: true });
-    delete user.password; // Remove password from the user object before sending it in the response
+    // 3. Strip password safely
+    const { password: pass, ...rest } = user._doc;
 
-    res.status(200).json({
-      success: true,
-      message: "Login successful",
-      user,
-      token
-    });
+    // 4. Send clean response matching the standard login framework
+    res.status(200)
+      .cookie("access_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        path: "/",
+      })
+      .json({
+        success: true,
+        message: "Login successful",
+        user: rest
+      });
+
   } catch (error) {
-    next(handleError(500, error.message || "Server error during login"));
+    next(handleError(500, error.message || "Server error during Google login"));
   }
-}
+};
 
 export const logout = (req, res, next) => {
   try {

@@ -10,7 +10,6 @@ export const verifyToken = (req, res, next) => {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) return next(handleError(401, 'Unauthorized: Invalid token'));
-    console.log("DECODED TOKEN:", user); // 👈 check if it has 'id' or '_id'
     req.user = user;
     next();
   });
