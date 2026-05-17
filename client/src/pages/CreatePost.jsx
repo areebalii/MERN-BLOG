@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { useSelector } from 'react-redux';
@@ -10,6 +10,7 @@ const CreatePost = () => {
   const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({ title: '', content: '', category: '' });
+  const [categories, setCategories] = useState([]); // 👈 State for dynamic categories
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -28,17 +29,35 @@ const CreatePost = () => {
     ],
   };
 
+  // 👈 Fetch live categories from your backend server port
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('http://localhost:3000/api/category/all');
+        const data = await res.json();
+        if (data.success) {
+          setCategories(data.categories);
+        }
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+        toast.error("Failed to load categories");
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
-      setImagePreview(URL.createObjectURL(selectedFile)); // Create live preview link
+      setImagePreview(URL.createObjectURL(selectedFile));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!userData?._id) return toast.error("Please login first");
+    if (!formData.category) return toast.error("Please select a category");
     if (!formData.content || formData.content === '<p><br></p>') {
       return toast.error("Please write some content before publishing");
     }
@@ -53,7 +72,7 @@ const CreatePost = () => {
     if (file) data.append('file', file);
 
     try {
-      const res = await fetch('http://localhost:3000/api/post/create', {
+      const res = await fetch('http://localhost:3000/api/post/create', { // 👈 Kept your original URL layout
         method: 'POST',
         body: data,
       });
@@ -124,17 +143,22 @@ const CreatePost = () => {
             </label>
           </div>
 
-          {/* Minimalist Selection Menu */}
+          {/* Dynamic Selection Menu */}
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Select Category</label>
             <select
               className="w-full p-3.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700 outline-none focus:border-violet-500 transition-all appearance-none cursor-pointer shadow-sm"
+              value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               required
             >
               <option value="">Choose a topic...</option>
-              <option value="technology">Technology</option>
-              <option value="lifestyle">Lifestyle</option>
+              {/* 👈 Dynamically map options from your database array */}
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat.slug}>
+                  {cat.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -152,7 +176,6 @@ const CreatePost = () => {
             </div>
           </div>
 
-          {/* Premium UI Styles injected right into Quill dynamically */}
           <style>{`
             .quill-wrapper .ql-toolbar.ql-snow {
               border: none !important;
@@ -166,7 +189,7 @@ const CreatePost = () => {
               font-size: 1rem !important;
             }
             .quill-wrapper .ql-editor {
-              min-height: 320px !important; /* Elegant fluid default padding */
+              min-height: 320px !important;
               max-height: 600px;
               overflow-y: auto;
               color: #334155 !important;

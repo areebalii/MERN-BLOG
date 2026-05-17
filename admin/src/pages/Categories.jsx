@@ -33,6 +33,7 @@ const Categories = () => {
     try {
       const res = await fetch('http://localhost:3000/api/category/create', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name }),
       });
@@ -58,8 +59,9 @@ const Categories = () => {
     if (!window.confirm('Are you sure you want to delete this category?')) return;
 
     try {
-      const res = await fetch(`/api/category/delete/${id}`, {
+      const res = await fetch(`http://localhost:3000/api/category/delete/${id}`, {
         method: 'DELETE',
+        credentials: 'include'
       });
       const data = await res.json();
       if (data.success) {
