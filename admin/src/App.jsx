@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import AdminPrivateRoute from './components/AdminProtectedRoute';
 import Layout from './components/Layout';
 import Categories from './pages/Categories';
+import AllPosts from './pages/AllPosts';
 // import PostDetail from './pages/PostDetail';
 
 function App() {
@@ -26,7 +27,7 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/categories" element={<Categories />} />
-
+            <Route path="/posts" element={<AllPosts />} />
           </Route>
         </Route>
 

@@ -10,11 +10,11 @@ const CreatePost = () => {
   const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({ title: '', content: '', category: '' });
-  const [categories, setCategories] = useState([]); // 👈 State for dynamic categories
+  const [categories, setCategories] = useState([]); // State for dynamic categories
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Premium, production-ready toolbar modules
+  // toolbar modules
   const modules = {
     toolbar: [
       [{ 'header': [1, 2, 3, false] }],
@@ -29,7 +29,7 @@ const CreatePost = () => {
     ],
   };
 
-  // 👈 Fetch live categories from your backend server port
+  // Fetch live categories from your backend server port
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -72,7 +72,7 @@ const CreatePost = () => {
     if (file) data.append('file', file);
 
     try {
-      const res = await fetch('http://localhost:3000/api/post/create', { // 👈 Kept your original URL layout
+      const res = await fetch('http://localhost:3000/api/post/create', {
         method: 'POST',
         body: data,
       });

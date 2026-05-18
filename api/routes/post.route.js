@@ -1,7 +1,8 @@
 import express from 'express';
-import { createPost, getPostBySlug, getPosts, getRelatedPosts, likePost } from '../controllers/post.controller.js';
+import { createPost, deletePost, getAllPosts, getPostBySlug, getPosts, getRelatedPosts, likePost } from '../controllers/post.controller.js';
 import { upload } from '../middleware/multer.middleware.js';
-import { verifyToken } from '../middleware/verifyToken.middleware.js';
+import { verifyToken } from '../middleware/verifyToken.middleware.js'; 
+import { verifyAdmin } from '../middleware/varifyAdmin.middleware.js';
 
 const postRouter = express.Router();
 
@@ -11,7 +12,11 @@ postRouter.get('/getpost/:slug', getPostBySlug);
 postRouter.get('/all-posts', getPosts);
 postRouter.get('/related', getRelatedPosts);
 postRouter.put('/likePost/:postId', verifyToken, (req, res, next) => {
-  console.log("REQ USER:", req.user);       // see what's in token
-  console.log("POST ID:", req.params.postId);
   next();
-}, likePost); export default postRouter;
+}, likePost);
+
+postRouter.get('/allposts', verifyAdmin, getAllPosts);
+postRouter.delete('/deletepost/:id', verifyAdmin, deletePost);
+
+
+export default postRouter;

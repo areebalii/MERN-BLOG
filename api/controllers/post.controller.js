@@ -102,3 +102,39 @@ export const likePost = async (req, res, next) => {
     next(error);
   }
 };
+
+// Admin controllers
+
+// Get All Posts (with Pagination & Populated Authors)
+export const getAllPosts = async (req, res, next) => {
+  try {
+    // Fetch posts, populate author metadata, and sort by newest first
+    const posts = await Post.find()
+      .populate('author', 'name avatar email')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      posts,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete Post by Admin
+export const deletePost = async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return next(handleError(404, 'Post not found'));
+
+    await Post.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: 'The post has been deleted successfully.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
