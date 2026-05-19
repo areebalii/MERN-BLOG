@@ -1,8 +1,8 @@
 import express from 'express';
 import { createPost, deletePost, getAllPosts, getPostBySlug, getPosts, getRelatedPosts, likePost } from '../controllers/post.controller.js';
 import { upload } from '../middleware/multer.middleware.js';
-import { verifyToken } from '../middleware/verifyToken.middleware.js'; 
-import { verifyAdmin } from '../middleware/varifyAdmin.middleware.js';
+import { verifyToken } from '../middleware/verifyToken.middleware.js';
+import { verifyAdmin } from '../middleware/verifyAdmin.middleware.js';
 
 const postRouter = express.Router();
 

@@ -24,27 +24,15 @@ const Login = () => {
       });
 
       const data = await res.json();
-
-      if (data.success === false) {
-        setError(data.message);
-        setLoading(false);
-        return;
-      }
-
-      // 1. Check if the nested user object exists and is an admin 
       if (!data.user || data.user.role !== 'admin') {
-        setError("Access denied. You are not an admin.");
-        setLoading(false);
+        setError("Access denied.");
         return;
       }
-
-      // 2. Save the real user data object to localStorage 👈 FIXED HERE
       localStorage.setItem('adminUser', JSON.stringify(data.user));
-
-      // 3. Redirect to dashboard
+      localStorage.setItem('adminToken', data.token); // ← save token too
       navigate('/dashboard');
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      setError("Something went wrong. Please try again.", err);
     } finally {
       setLoading(false);
     }

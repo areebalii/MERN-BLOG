@@ -1,6 +1,6 @@
 import express from 'express';
 import { getDashboardStats } from '../controllers/admin.controller.js';
-import { verifyAdmin } from '../middleware/varifyAdmin.middleware.js';
+import { verifyAdmin } from '../middleware/verifyAdmin.middleware.js';
 
 const adminRouter = express.Router();
 

@@ -18,6 +18,7 @@ const allowedOrigins = [
   process.env.ADMIN_URL     // e.g., http://localhost:5174
 ];
 
+
 app.use(cors({
   origin: function (origin, callback) {
     // allow requests with no origin (like mobile apps or curl requests)
@@ -54,11 +55,6 @@ mongoose.connect(process.env.MONGODB_CONN, { dbName: "mern-blog" })
   console.error("Error connecting to MongoDB:", error);
 });
 
-
-app.listen(PORT, () => {
-  console.log(`Server is running on  http://localhost:${PORT}`);
-});
-
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
@@ -68,3 +64,8 @@ app.use((err, req, res, next) => {
     message
   });
 });
+
+app.listen(PORT, () => {
+  console.log(`Server is running on  http://localhost:${PORT}`);
+});
+

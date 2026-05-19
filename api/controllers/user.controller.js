@@ -96,37 +96,32 @@ export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // 1. Find user by email
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    // 2. Check password match
     const isMatch = await bcryptjs.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
 
-    // 3. Generate JWT Token with explicit role
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '1d' } // Highly recommended to set an expiration
+      { expiresIn: '1d' }
     );
 
-    // 4. Exclude password out of the response document safely
     const { password: pass, ...rest } = user._doc;
 
-    // 5. Send cookie with client credentials safety policies
-    // Inside your login controller function on the backend
     res.status(200)
       .cookie("access_token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",  // ← only HTTPS in prod
+        secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
       })
       .json({
         success: true,
         message: "Login successful",
-        user: rest
+        user: rest,
+        token  // ← this was missing, add it here
       });
   } catch (error) {
     next(error);

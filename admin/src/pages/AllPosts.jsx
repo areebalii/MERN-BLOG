@@ -11,7 +11,7 @@ const AllPosts = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:3000/api/post/allposts', {
+      const res = await fetch(`${import.meta.env.BACKEND_URL}/post/allposts`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ const AllPosts = () => {
     if (!window.confirm('Are you absolute sure you want to permanently delete this story?')) return;
 
     try {
-      const res = await fetch(`http://localhost:3000/api/post/deletepost/${postId}`, {
+      const res = await fetch(`${import.meta.env.BACKEND_URL}/post/deletepost/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -50,7 +50,8 @@ const AllPosts = () => {
       if (data.success) {
         setPosts(posts.filter((post) => post._id !== postId));
       } else {
-console.error('Delete API Error:', data.message);   }
+        console.error('Delete API Error:', data.message);
+      }
     } catch (err) {
       console.error('Delete API Error:', err);
       console.error('Delete API Error:', data.message);

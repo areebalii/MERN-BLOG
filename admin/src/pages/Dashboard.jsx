@@ -22,18 +22,27 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    // Fetch local active admin profile session data
     const savedAdmin = JSON.parse(localStorage.getItem('adminUser'));
+    const adminToken = localStorage.getItem('adminToken');
+
+    console.log("adminToken:", adminToken); // ← check console
+    console.log("savedAdmin:", savedAdmin); // ← check console
+
+    if (!adminToken || !savedAdmin || savedAdmin.role !== 'admin') {
+      setLoading(false);
+      window.location.href = '/sign-in';
+      return;
+    }
+
     setAdmin(savedAdmin);
 
     const fetchDashboardData = async () => {
       try {
-        setLoading(true);
         const res = await fetch('http://localhost:3000/api/admin/stats', {
           method: 'GET',
-          credentials: 'include',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
           }
         });
         const data = await res.json();
@@ -54,6 +63,7 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('adminUser');
+    localStorage.removeItem('adminToken'); // ← clear token on logout
     navigate('/sign-in');
   };
 
@@ -142,7 +152,6 @@ const Dashboard = () => {
                 <tbody className="divide-y divide-slate-50 text-sm">
                   {recentPosts.map((post) => (
                     <tr key={post._id} className="hover:bg-slate-50/40 transition-colors group">
-                      {/* Title + Thumbnail Preview */}
                       <td className="py-3.5 px-5 flex items-center gap-3">
                         <img
                           src={post.featuredImage}
@@ -156,20 +165,17 @@ const Dashboard = () => {
                           <p className="text-[11px] text-slate-400 truncate">by {post.author?.name || 'Unknown'}</p>
                         </div>
                       </td>
-                      {/* Category Badge */}
                       <td className="py-3.5 px-5 whitespace-nowrap">
                         <span className="text-[10px] font-black uppercase tracking-wider text-purple-600 bg-purple-50 px-2.5 py-1 rounded-md border border-purple-100/30">
                           {post.category}
                         </span>
                       </td>
-                      {/* Created Timestamp */}
                       <td className="py-3.5 px-5 text-xs text-slate-400 whitespace-nowrap">
                         <div className="flex items-center gap-1.5 font-medium">
                           <HiOutlineClock className="text-slate-300" />
                           {new Date(post.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                         </div>
                       </td>
-                      {/* Deep Link View Route Button */}
                       <td className="py-3.5 px-5 text-center whitespace-nowrap">
                         <Link
                           to={`/post/${post.slug}`}
