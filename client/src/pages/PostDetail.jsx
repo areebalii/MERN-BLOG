@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import {
   HiOutlineThumbUp,
   HiThumbUp,
-  HiOutlineChatAlt2,
   HiOutlineClock,
   HiOutlineShare,
   HiOutlineBookmark,
@@ -35,7 +34,7 @@ const PostDetail = () => {
     const fetchPostAndRelated = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:3000/api/post/getpost/${slug}`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/post/getpost/${slug}`);
         const data = await res.json();
 
         if (!res.ok) {
@@ -47,7 +46,7 @@ const PostDetail = () => {
         if (data.success) {
           setPost(data.post);
           const relatedRes = await fetch(
-            `http://localhost:3000/api/post/related?category=${data.post.category}&currentPostId=${data.post._id}`
+            `${import.meta.env.VITE_API_BASE_URL}/post/related?category=${data.post.category}&currentPostId=${data.post._id}`
           );
           const relatedData = await relatedRes.json();
           if (relatedData.success) {

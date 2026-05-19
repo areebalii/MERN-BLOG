@@ -17,6 +17,7 @@ postRouter.put('/likePost/:postId', verifyToken, (req, res, next) => {
 
 postRouter.get('/allposts', verifyAdmin, getAllPosts);
 postRouter.delete('/deletepost/:id', verifyAdmin, deletePost);
+postRouter.post('/create', verifyAdmin, createPost);
 
 
 export default postRouter;

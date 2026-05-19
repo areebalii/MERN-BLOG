@@ -220,8 +220,6 @@ export const getUserStats = async (req, res, next) => {
 };
 
 // function to update user profile (name, avatar, etc.)
-
-
 export const updateUser = async (req, res, next) => {
   try {
     const { name, bio } = req.body;
@@ -247,5 +245,39 @@ export const updateUser = async (req, res, next) => {
   } catch (error) {
     console.error("Cloudinary/DB Error:", error); // This shows the error in your terminal
     next(error);
+  }
+};
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+    let updateFields = { name, email };
+
+    // 1. If a new password string is filled, re-hash it securely
+    if (password) {
+      updateFields.password = bcryptjs.hashSync(password, 10);
+    }
+
+    // 2. Upload file stream cleanly to Cloudinary if updated
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'user_avatars',
+      });
+      updateFields.avatar = result.secure_url;
+    }
+
+    // 3. Update the matching user schema profile block
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateFields },
+      { new: true }
+    ).select('-password'); // Strip password context string from response packet
+
+    res.status(200).json({
+      success: true,
+      user: updatedUser,
+    });
+  } catch (error) {
+    next(handleError(500, error.message));
   }
 };

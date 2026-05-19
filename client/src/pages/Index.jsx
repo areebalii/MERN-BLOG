@@ -1,4 +1,4 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HiOutlineArrowRight, HiOutlineClock } from 'react-icons/hi';
 
@@ -9,7 +9,7 @@ const Index = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/post/all-posts');
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/post/all-posts`);
         const data = await res.json();
         if (data.success) {
           setPosts(data.posts);
@@ -89,10 +89,28 @@ const Index = () => {
                     <div className="flex items-center gap-3">
                       <img
                         src={post.author?.avatar || `https://ui-avatars.com/api/?name=${post.author?.name}`}
-                        className="w-10 h-10 rounded-full border-2 border-white ring-1 ring-slate-100"
+                        className="w-10 h-10 rounded-full border-2 border-white ring-1 ring-slate-100 object-cover"
                         alt="author"
                       />
-                      <span className="text-sm font-semibold text-slate-700">{post.author?.name}</span>
+
+                      {/* AUTHOR NAME WITH PURPLE VERIFICATION BADGE */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-semibold text-slate-700">
+                          {post.author?.name || 'System User'}
+                        </span>
+
+                        {/* Check role configuration layout flags */}
+                        {post.author?.role === 'admin' && (
+                          <span
+                            className="inline-flex items-center justify-center bg-purple-100 text-purple-600 rounded-full font-black text-[8px] border border-purple-200"
+                            title="Verified Admin Author"
+                            style={{ width: '13px', height: '13px' }}
+                          >
+                            ✓
+                          </span>
+                        )}
+                      </div>
+
                     </div>
                     <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors">
                       <HiOutlineArrowRight />

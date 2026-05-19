@@ -41,7 +41,7 @@ export const createPost = async (req, res, next) => {
 
 export const getPostBySlug = async (req, res, next) => {
   try {
-    const post = await Post.findOne({ slug: req.params.slug }).populate('author', 'name avatar');
+    const post = await Post.findOne({ slug: req.params.slug }).populate('author', 'name avatar role');
     if (!post) {
       return next(handleError(404, 'Post not found'));
     }
@@ -55,7 +55,7 @@ export const getPosts = async (req, res, next) => {
   try {
     // Sort by createdAt -1 to show newest blogs first
     const posts = await Post.find()
-      .populate('author', 'name avatar')
+      .populate('author', 'name avatar role')
       .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, posts });
@@ -110,7 +110,7 @@ export const getAllPosts = async (req, res, next) => {
   try {
     // Fetch posts, populate author metadata, and sort by newest first
     const posts = await Post.find()
-      .populate('author', 'name avatar email')
+      .populate('author', 'name avatar email role')
       .sort({ createdAt: -1 });
 
     res.status(200).json({

@@ -5,6 +5,7 @@ import AdminPrivateRoute from './components/AdminProtectedRoute';
 import Layout from './components/Layout';
 import Categories from './pages/Categories';
 import AllPosts from './pages/AllPosts';
+import CreatePost from './components/CreatePost';
 // import PostDetail from './pages/PostDetail';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="/posts" element={<AllPosts />} />
+            <Route path="/create-post" element={<CreatePost />} />
           </Route>
         </Route>
 
