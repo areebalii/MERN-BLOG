@@ -7,16 +7,18 @@ const AllPosts = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Fetch all posts using your explicit absolute URL layout setup
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${import.meta.env.BACKEND_URL}/post/allposts`, {
+      const adminToken = localStorage.getItem('adminToken');
+      // 1. Updated to use the correct VITE_ prefix
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/post/allposts`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
         },
-        credentials: 'include', // Include cookies for authentication if needed
+        credentials: 'include',
       });
       const data = await res.json();
       if (data.success) {
@@ -33,15 +35,16 @@ const AllPosts = () => {
     fetchPosts();
   }, []);
 
-  // Handle Post Deletion
   const handleDelete = async (postId) => {
     if (!window.confirm('Are you absolute sure you want to permanently delete this story?')) return;
 
     try {
-      const res = await fetch(`${import.meta.env.BACKEND_URL}/post/deletepost/${postId}`, {
+      const adminToken = localStorage.getItem('adminToken');
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/post/deletepost/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
         },
         credentials: 'include',
       });
@@ -54,11 +57,9 @@ const AllPosts = () => {
       }
     } catch (err) {
       console.error('Delete API Error:', err);
-      console.error('Delete API Error:', data.message);
     }
   };
 
-  // Filter posts based on dynamic search bar value
   const filteredPosts = posts.filter((post) =>
     post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     post.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -157,8 +158,22 @@ const AllPosts = () => {
                           className="w-7 h-7 rounded-lg object-cover"
                         />
                         <div>
-                          <p className="text-xs font-bold text-slate-700 leading-none">{post.author?.name || 'System User'}</p>
-                          <p className="text-[10px] text-slate-400 mt-0.5 font-medium">{post.author?.email || 'deleted@user.com'}</p>
+                          {/* AUTHOR NAME WITH PURPLE ADMIN TICK */}
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-xs font-bold text-slate-700 leading-none">
+                              {post.author?.name || 'System User'}
+                            </p>
+                            {post.author?.role === 'admin' && (
+                              <span
+                                className="inline-flex items-center justify-center bg-purple-100 text-purple-600 rounded-full font-black text-[8px] border border-purple-200"
+                                title="Verified Admin Author"
+                                style={{ width: '12px', height: '12px', transform: 'translateY(-1px)' }}
+                              >
+                                ✓
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-400 mt-1 font-medium">{post.author?.email || 'deleted@user.com'}</p>
                         </div>
                       </div>
                     </td>
