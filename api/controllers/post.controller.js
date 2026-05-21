@@ -103,8 +103,96 @@ export const likePost = async (req, res, next) => {
   }
 };
 
-// Admin controllers
+// 1. Fetch a single post by its MongoDB Object ID 
+export const getPostById = async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    if (!post) {
+      return next(handleError(404, 'Post not found'));
+    }
+    res.status(200).json({ success: true, post });
+  } catch (error) {
+    next(error);
+  }
+};
 
+
+export const updatePost = async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    if (!post) {
+      return next(handleError(404, 'Post not found'));
+    }
+
+    // Authorization Guard: Requesting user must be the author OR an admin
+    if (post.author.toString() !== req.params.userId && req.user.role !== 'admin') {
+      return next(handleError(403, 'You are not authorized to edit this post'));
+    }
+
+    let updateFields = {
+      title: req.body.title,
+      category: req.body.category,
+      content: req.body.content,
+    };
+
+    // If a new binary image asset file is present, upload it to Cloudinary
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'blog_posts',
+      });
+      updateFields.featuredImage = result.secure_url;
+    }
+
+    // Regenerate a valid post slug if the author changed the text of the title
+    if (req.body.title) {
+      updateFields.slug = req.body.title
+        .toLowerCase()
+        .trim()
+        .split(' ')
+        .join('-')
+        .replace(/[^a-zA-Z0-9-]/g, '') + '-' + Math.random().toString(36).slice(-5);
+    }
+
+    // Save modifications to MongoDB using the clean { new: true } return option
+    const updatedPost = await Post.findByIdAndUpdate(
+      req.params.postId,
+      { $set: updateFields },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      post: updatedPost,
+    });
+  } catch (error) {
+    next(handleError(500, error.message));
+  }
+};
+
+export const deletePostUser = async (req, res, next) => {
+  try {
+    // 1. Locate the targeted article document post instance
+    const post = await Post.findById(req.params.postId);
+    if (!post) return next(handleError(404, 'Post not found'));
+
+    // 2. Validate authority: User must be the author OR an admin
+    if (post.author.toString() !== req.params.userId && req.user.role !== 'admin') {
+      return next(handleError(403, 'You are not authorized to delete this post'));
+    }
+
+    // 3. Clear from collection schema matching index records
+    await Post.findByIdAndDelete(req.params.postId);
+
+    res.status(200).json({
+      success: true,
+      message: 'The post has been deleted successfully.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Admin controllers
 // Get All Posts (with Pagination & Populated Authors)
 export const getAllPosts = async (req, res, next) => {
   try {
