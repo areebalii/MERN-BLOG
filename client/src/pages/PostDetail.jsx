@@ -77,7 +77,7 @@ const PostDetail = () => {
   const handleLike = async () => {
     if (!currentUser) return navigate('/sign-in');
     try {
-      const res = await fetch(`http://localhost:3000/api/post/likePost/${post._id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/post/likePost/${post._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
