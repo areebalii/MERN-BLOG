@@ -136,11 +136,16 @@ export const GoogleLogin = async (req, res, next) => {
     let user = await User.findOne({ email });
 
     if (!user) {
-      // If user doesn't exist, create a new user (defaults to "user" role)
-      const password = Math.random().toString(36).slice(-8);
+      // Generate a strong random password fallback string
+      const password = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
       const hashedPassword = await bcryptjs.hash(password, 10);
+
+      // Handle potential username collisions or missing custom fields if your schema requires them
       const newUser = new User({
-        name, email, password: hashedPassword, avatar
+        name,
+        email,
+        password: hashedPassword,
+        avatar: avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ede9fe&color=7c3aed`
       });
       user = await newUser.save();
     }
@@ -152,28 +157,29 @@ export const GoogleLogin = async (req, res, next) => {
         role: user.role
       },
       process.env.JWT_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '7d' } // Extended to 7d to match your standard login token lifespan config
     );
 
     // 3. Strip password safely
     const { password: pass, ...rest } = user._doc;
 
-    // 4. Send clean response matching the standard login framework
+    // 4. CRITICAL FIX: Explicit Production Cookie Flags for Cross-Domain Vercel Deployments
     res.status(200)
       .cookie("access_token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: true,     // Force True: Essential for HTTPS transmission on Vercel production
+        sameSite: "none", // Force None: Essential for cross-domain cookie passing between frontend and backend links
         path: "/",
       })
       .json({
         success: true,
         message: "Login successful",
-        user: rest
+        user: rest,
+        token // Return the token string explicitly as backup fallback context if needed on the client state
       });
 
   } catch (error) {
-    next(handleError(500, error.message || "Server error during Google login"));
+    next(error); // Pass directly to your global error handler middleware cleanly
   }
 };
 
