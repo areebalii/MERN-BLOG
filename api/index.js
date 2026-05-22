@@ -55,6 +55,10 @@ mongoose.connect(process.env.MONGODB_CONN, { dbName: "mern-blog" })
   console.error("Error connecting to MongoDB:", error);
 });
 
+app.get("/", (req, res) => {
+  res.send("Welcome to the G-Blog API!");
+});
+
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
