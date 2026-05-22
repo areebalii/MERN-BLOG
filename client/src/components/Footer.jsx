@@ -54,7 +54,7 @@ const Footer = () => {
             © {currentYear} G-Blog. All rights reserved.
           </p>
           <div className="flex gap-6 text-xs text-gray-400">
-            <span>Made with ❤️ by Areeb Ali</span>
+            <span>Made by Areeb Ali</span>
           </div>
         </div>
       </div>
