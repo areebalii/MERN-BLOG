@@ -15,7 +15,8 @@ const app = express();
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.ADMIN_URL,
-  "https://blog-lovat-three-79.vercel.app"
+  "https://blog-lovat-three-79.vercel.app",
+  "https://mern-blog-admin.vercel.app"
 ];
 
 app.use(cors({
