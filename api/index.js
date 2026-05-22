@@ -14,7 +14,8 @@ const app = express();
 
 const allowedOrigins = [
   process.env.FRONTEND_URL,
-  process.env.ADMIN_URL
+  process.env.ADMIN_URL,
+  "https://mern-blog-backend-xi.vercel.app/"
 ];
 
 app.use(cors({
