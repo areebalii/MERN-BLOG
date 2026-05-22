@@ -27,7 +27,8 @@ const CommentSection = ({ postId }) => {
     e.preventDefault();
     if (comment.length > 200 || comment.trim() === '') return;
     try {
-      const res = await fetch('http://localhost:3000/api/comment/create', {
+      // 🔥 FIX: Changed from http://localhost:3000 to production environment variable
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/comment/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -73,7 +74,8 @@ const CommentSection = ({ postId }) => {
   const handleDelete = async (commentId) => {
     if (!window.confirm("Are you sure you want to delete this comment?")) return;
     try {
-      const res = await fetch(`http://localhost:3000/api/comment/deleteComment/${commentId}`, {
+      // 🔥 FIX: Changed from http://localhost:3000 to production environment variable
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/comment/deleteComment/${commentId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -87,7 +89,8 @@ const CommentSection = ({ postId }) => {
 
   const handleSaveEdit = async (commentId) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/comment/editComment/${commentId}`, {
+      // 🔥 FIX: Changed from http://localhost:3000 to production environment variable
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/comment/editComment/${commentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -95,7 +98,6 @@ const CommentSection = ({ postId }) => {
       });
       if (res.ok) {
         const data = await res.json();
-        // Since backend uses populate, data will contain the userId object
         setComments(comments.map((c) => (c._id === commentId ? { ...c, content: data.content } : c)));
         setEditingCommentId(null);
       }
@@ -103,6 +105,25 @@ const CommentSection = ({ postId }) => {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/comment/getPostComments/${postId}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setComments(data);
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+    fetchComments();
+  }, [postId]);
+
 
   return (
     /* 3. Attach the ref here */
