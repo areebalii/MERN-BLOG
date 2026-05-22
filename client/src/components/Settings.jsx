@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { HiOutlineUser, HiOutlineLockClosed, HiOutlineLogout, HiOutlineExclamationCircle } from 'react-icons/hi';
+import { HiOutlineUser, HiOutlineLockClosed, HiOutlineLogout } from 'react-icons/hi';
 import { showToast } from '@/helper/showToast';
 import { setUser } from '../redux/user/user.slice'; // Adjust path if needed
 import { useNavigate } from 'react-router-dom';
@@ -27,28 +27,41 @@ const Settings = () => {
       return showToast("error", "New passwords do not match!");
     }
 
+    // ... upper code state properties stay identical
     try {
       setLoading(true);
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user/update-password/${userData._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Sends your access_token cookie
+        credentials: 'include',
         body: JSON.stringify({
           currentPassword: securityData.currentPassword,
           newPassword: securityData.newPassword
         })
       });
 
+      // 👇 Robust Defensive Layer: Catch HTML/404/500 errors gracefully before .json() executes
+      if (!res.ok) {
+        const errorText = await res.text();
+        let parsedMessage = "An error occurred updating security settings.";
+        try {
+          const parsedError = JSON.parse(errorText);
+          parsedMessage = parsedError.message;
+        } catch (e) {
+          // Fallback if response is raw HTML text string layout from server crash
+          if (res.status === 404) parsedMessage = "Server route path endpoint not found (404).";
+        }
+        return showToast("error", parsedMessage);
+      }
+
       const data = await res.json();
-      if (res.ok && data.success) {
+      if (data.success) {
         showToast("success", "Password updated successfully!");
         setSecurityData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      } else {
-        showToast("error", data.message || "Failed to update password");
       }
     } catch (err) {
       console.error(err);
-      showToast("error", "An error occurred updating security settings.");
+      showToast("error", "Network connection tracking error occurred.");
     } finally {
       setLoading(false);
     }

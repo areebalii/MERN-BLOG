@@ -27,9 +27,9 @@ const Footer = () => {
             <h4 className="font-semibold text-gray-900">Explore</h4>
             <ul className="flex flex-col gap-2 text-sm text-gray-500">
               <li><Link to="/" className="hover:text-purple-600 transition-colors">Latest Posts</Link></li>
-              <li><Link to="/about" className="hover:text-purple-600 transition-colors">About Us</Link></li>
-              <li><Link to="/contact" className="hover:text-purple-600 transition-colors">Contact</Link></li>
-              <li><Link to="/privacy" className="hover:text-purple-600 transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/" className="hover:text-purple-600 transition-colors">About Us</Link></li>
+              <li><Link to="/" className="hover:text-purple-600 transition-colors">Contact</Link></li>
+              <li><Link to="/" className="hover:text-purple-600 transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
 
@@ -54,7 +54,7 @@ const Footer = () => {
             © {currentYear} G-Blog. All rights reserved.
           </p>
           <div className="flex gap-6 text-xs text-gray-400">
-            <span>Made with ❤️ by Vaibhav</span>
+            <span>Made with ❤️ by Areeb Ali</span>
           </div>
         </div>
       </div>

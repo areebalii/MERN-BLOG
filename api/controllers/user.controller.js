@@ -194,8 +194,54 @@ export const logout = (req, res, next) => {
   }
 };
 
+// controller to update user password securely
+export const updatePassword = async (req, res, next) => {
+  // Security verification: Ensure users can only modify their own profile details
+  if (req.user.id !== req.params.userId) {
+    return next(handleError(403, 'Forbidden: You can only update your own password'));
+  }
 
-// New controller function to get user stats for the profile page
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return next(handleError(400, 'All credential input fields are strictly required'));
+  }
+
+  if (newPassword.length < 6) {
+    return next(handleError(400, 'New password must be at least 6 characters long'));
+  }
+
+  try {
+    // 1. Locate the existing user record context
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      return next(handleError(404, 'User document schema context not found'));
+    }
+
+    // 2. Validate current stored password using bcryptjs match properties
+    const isMatch = await bcryptjs.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return next(handleError(400, 'Incorrect current password entry'));
+    }
+
+    // 3. Hash the new password entry before commit
+    const salt = await bcryptjs.genSalt(10);
+    const hashedNewPassword = await bcryptjs.hash(newPassword, salt);
+
+    // 4. Update the document record safely
+    user.password = hashedNewPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password updated successfully!',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// controller function to get user stats for the profile page
 export const getUserStats = async (req, res, next) => {
   try {
     // 1. Get the user ID from the request (from the URL or the JWT)
