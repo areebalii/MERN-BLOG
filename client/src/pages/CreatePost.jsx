@@ -33,7 +33,10 @@ const CreatePost = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/category/all`, {
+          method: 'GET',
+          credentials: 'include',
+        });
         const data = await res.json();
         if (data.success) {
           setCategories(data.categories);
@@ -75,6 +78,7 @@ const CreatePost = () => {
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/post/create`, {
         method: 'POST',
         body: data,
+        credentials: 'include',
       });
       const result = await res.json();
       if (result.success) {
