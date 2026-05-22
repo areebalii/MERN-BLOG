@@ -113,15 +113,15 @@ export const login = async (req, res, next) => {
     res.status(200)
       .cookie("access_token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: true,        // Force True: Cookies will only transmit over secure HTTPS tunnels
+        sameSite: "none",    // Force None: Essential for cross-domain cookie storage passes between different .vercel.app links
         path: "/",
       })
       .json({
         success: true,
         message: "Login successful",
         user: rest,
-        token  // ← this was missing, add it here
+        token
       });
   } catch (error) {
     next(error);
@@ -149,7 +149,7 @@ export const GoogleLogin = async (req, res, next) => {
     const token = jwt.sign(
       {
         id: user._id,
-        role: user.role 
+        role: user.role
       },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }

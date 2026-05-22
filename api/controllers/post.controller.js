@@ -82,11 +82,15 @@ export const getRelatedPosts = async (req, res, next) => {
 
 export const likePost = async (req, res, next) => {
   try {
+    // 1. Fail-safe fallback check to ensure middleware populated req.user safely
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized: Missing identity profile context" });
+    }
+
     const post = await Post.findById(req.params.postId);
-    if (!post) return next(handleError(404, 'Post not found'));
+    if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
 
     const currentUserId = req.user.id;
-
     const userIndex = post.likes.indexOf(currentUserId);
 
     if (userIndex === -1) {
@@ -96,8 +100,12 @@ export const likePost = async (req, res, next) => {
     }
 
     await post.save();
-    // Return the whole post or just the likes array
-    res.status(200).json(post);
+
+    // 2. Return the exact state signature your frontend layout expects
+    res.status(200).json({
+      success: true,
+      likes: post.likes // Frontend reads this array to calculate count lengths or active flags
+    });
   } catch (error) {
     next(error);
   }
