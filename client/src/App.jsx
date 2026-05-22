@@ -10,6 +10,7 @@ import CreatePost from './pages/CreatePost'
 // 1. Import your new Post Detail page
 import PostDetail from './pages/PostDetail'
 import UpdatePost from './components/UpdatePost'
+import Settings from './components/Settings'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path={RouteProfile} element={<Profile />} />
             <Route path={RouteCreatePost} element={<CreatePost />} />
             <Route path="/update-post/:postId" element={<UpdatePost />} />
+            <Route path="/settings" element={<Settings />} />
 
             {/* 2. ADD THIS LINE: It allows the URL /post/whatever-slug to work */}
             <Route path="/post/:slug" element={<PostDetail />} />
