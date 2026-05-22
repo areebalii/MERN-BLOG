@@ -10,18 +10,16 @@ import adminRouter from "./routes/admin.route.js";
 import categoryRouter from "./routes/category.route.js";
 
 dotenv.config();
-const PORT = process.env.PORT || 5000;
 const app = express();
 
 const allowedOrigins = [
-  process.env.FRONTEND_URL, // e.g., http://localhost:5173
-  process.env.ADMIN_URL     // e.g., http://localhost:5174
+  process.env.FRONTEND_URL,
+  process.env.ADMIN_URL
 ];
-
 
 app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin like mobile apps or local postman testers
     if (!origin) return callback(null, true);
 
     if (allowedOrigins.indexOf(origin) === -1) {
@@ -32,33 +30,50 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(express.json())
+
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser())
+app.use(cookieParser());
 
+// 🔌 Serverless-Safe MongoDB Pooling Strategy
+let cachedConnection = null;
 
+const connectDB = async () => {
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    return cachedConnection;
+  }
+
+  console.log("Creating brand new database connection instance pool...");
+  cachedConnection = await mongoose.connect(process.env.MONGODB_CONN, {
+    dbName: "mern-blog",
+    bufferCommands: false, // Turn off buffering so errors surface immediately
+  });
+  return cachedConnection;
+};
+
+// Route-intercept middleware to guarantee connection state safely before route handling
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("Database connection middleware crash:", error);
+    res.status(500).json({ success: false, message: "Database connection failed" });
+  }
+});
 
 // Routes
 app.use("/api/user", userRouter);
 app.use('/api/post', postRouter);
 app.use('/api/comment', commentRouter);
 app.use('/api/category', categoryRouter);
-app.use('/api/admin', adminRouter); 
-
-
-
-mongoose.connect(process.env.MONGODB_CONN, { dbName: "mern-blog" })
-.then(() => {
-  console.log("Connected to MongoDB");
-})
-.catch((error) => {
-  console.error("Error connecting to MongoDB:", error);
-});
+app.use('/api/admin', adminRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcome to the G-Blog API!");
 });
 
+// Global Error Handler
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
@@ -69,11 +84,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-
 export default app;
 
-// 3. Conditional Listener execution check
-// This ensures app.listen runs ONLY during your local development flow, not in Vercel production.
+// Local development server listener block
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
