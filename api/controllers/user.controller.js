@@ -116,6 +116,7 @@ export const login = async (req, res, next) => {
         secure: true,        // Force True: Cookies will only transmit over secure HTTPS tunnels
         sameSite: "none",    // Force None: Essential for cross-domain cookie storage passes between different .vercel.app links
         path: "/",
+        maxAge: 7 * 24 * 60 * 60 * 1000
       })
       .json({
         success: true,
@@ -170,6 +171,7 @@ export const GoogleLogin = async (req, res, next) => {
         secure: true,     // Force True: Essential for HTTPS transmission on Vercel production
         sameSite: "none", // Force None: Essential for cross-domain cookie passing between frontend and backend links
         path: "/",
+        maxAge: 7 * 24 * 60 * 60 * 1000
       })
       .json({
         success: true,
