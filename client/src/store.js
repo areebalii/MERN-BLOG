@@ -1,6 +1,7 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import userReducer from './redux/user/user.slice'
-import sessionStorage from 'redux-persist/es/storage/session'
+// 🔥 FIX: Use the /es/storage path to get the clean localStorage engine directly
+import storage from 'redux-persist/es/storage'
 import persistReducer from 'redux-persist/es/persistReducer'
 import persistStore from 'redux-persist/es/persistStore'
 
@@ -10,7 +11,7 @@ const rootReducer = combineReducers({
 
 const persistConfig = {
   key: 'root',
-  storage: sessionStorage,
+  storage, // Now safely references the correct engine containing .getItem and .setItem
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
