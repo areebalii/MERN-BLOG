@@ -1,6 +1,5 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import userReducer from './redux/user/user.slice'
-// 🔥 FIX: Use the /es/storage path to get the clean localStorage engine directly
 import storage from 'redux-persist/es/storage'
 import persistReducer from 'redux-persist/es/persistReducer'
 import persistStore from 'redux-persist/es/persistStore'
